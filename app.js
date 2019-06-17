@@ -16,12 +16,12 @@ const config = require('config-lite')({
 const db = require('./db/mongodb.js');
 const MongoStore = require('connect-mongo')(session);
 
-const privateKey  = fs.readFileSync(path.join(__dirname, './certificate/private.pem'), 'utf8');
-const certificate = fs.readFileSync(path.join(__dirname, './certificate/file.crt'), 'utf8');
+const privateKey  = fs.readFileSync(path.join(__dirname, './certificate/server.key'), 'utf8');
+const certificate = fs.readFileSync(path.join(__dirname, './certificate/server.crt'), 'utf8');
 const credentials = {key: privateKey, cert: certificate};
 
 const app = express();
-
+app.use(history()); // 必须将该语句放在此位置 原因未知
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'pug');
@@ -30,13 +30,13 @@ app.use(logger('dev'));
 app.use(express.json());
 app.use(express.urlencoded({ extended: false }));
 app.use(express.static(path.join(__dirname, 'dist')));
-app.use(history());
 
 app.use(cookieParser());
 app.use(session({
   ...config.session,
   store: new MongoStore({mongooseConnection: db})
 }))
+
 
 
 app.use('/', router);
@@ -60,8 +60,9 @@ app.use(function(err, req, res, next) {
 // https.createServer({
 //   credentials
 // }, app)
-// .listen(3000, function () {
-//   console.log('Example app listening on port 3000! Go to https://localhost:3000/')
+// .listen(443, function () {
+//   const port = config.port;
+//   console.log(`Example app listening on port ${port}! Go to https://localhost:${port}/`)
 // })
 app.listen(config.port, () => console.log(chalk.green(`Example app listening on port ${config.port}!`)))
 
