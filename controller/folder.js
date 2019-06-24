@@ -27,6 +27,37 @@ class Folder {
         })
       })
   }
+
+  async addFolder(req, res, next) {
+    const username = req.session.username;
+    if(!username) {
+      res.send({
+        success: false,
+        type: 'NOT_LOGGED_IN',
+        message: 'Not logged in.'
+      })
+      return;
+    }
+    const folderName = req.body.folderName;
+    try {
+      await FolderModel.create({
+        folderName,
+        username
+      })
+    } catch(err) {
+      res.send({
+        success: false,
+        type: 'DATABASE_ERROR',
+        message: err.message
+      })
+      return;
+    }
+    res.send({
+      success: true,
+      type: 'ADD_FOLDER_SUCCESSFULLY',
+      message: 'Add folder successfully.'
+    })
+  }
 }
 
 module.exports = new Folder();

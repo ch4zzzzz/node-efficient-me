@@ -2,11 +2,14 @@
 
 const UserModel = require('../models/user.js');
 const UserInfoModel = require('../models/userInfo.js');
+const cryptoRandomString = require('crypto-random-string');
+const md5 = require('md5');
 
 class User {
   constructor() {
     this.login = this.login.bind(this);
     this.createUser = this.createUser.bind(this);
+    this.tLogin = this.tLogin.bind(this);
   }
 
   async login(req, res, next){
@@ -24,11 +27,7 @@ class User {
     try {
       const user = await UserModel.findOne({username});
       if(!user){
-        res.send({
-          success: false,
-          type: 'USER_NOT_FIND',
-          message: 'This user does not exist.'
-        })
+        this.createUser(req, res, next);
         return;
       } else if(user.password.toString() !== username.toString()) {
         res.send({
@@ -41,6 +40,13 @@ class User {
         req.session.username = username;
         const userInfoQuery = await UserInfoModel.findOne({username})
           .then(userInfo => {
+            const U_token = cryptoRandomString({length: 10, type: 'base64'})+md5(username);
+            UserModel.update(user, {U_token}, (err, docs) => {
+              if(err) {
+                console.log(err);
+              }
+            })
+            res.cookie('U_token', U_token, {httpOnly: true});
             res.send({
               success: true,
               type: 'GET_USERINFO_SUCCESSFULLY',
@@ -50,7 +56,7 @@ class User {
                 photo: userInfo.photo,
                 level: userInfo.level
               }
-            })
+            });
           });
         // if(!userInfoQuery) {
         //   res.send({
@@ -86,6 +92,55 @@ class User {
       return;
     }
 
+  }
+
+  async tLogin(req, res, next) {
+    const form = req.body;
+    const U_token = req.cookies.U_token;
+    if(!U_token) {
+      res.send({
+        success: false,
+        type: 'FORM_DATA_ERROR',
+        message: 'Form data error!'
+      })
+      return;
+    }
+    await UserModel.findOne({U_token}).then(user => {
+      if(!user) {
+        res.send({
+          success: false,
+          type: 'USER_NOT_FOUND',
+          message: 'User not found.'
+        })
+        return;
+      } else {
+        req.session.username = user.username;
+        const username = user.username;
+        console.log(username || 'no username')
+        const userInfoQuery = UserInfoModel.findOne({username})
+          .then(userInfo => {
+            const U_token = cryptoRandomString({length: 10, type: 'base64'})+md5(username);
+            UserModel.updateOne(user, {U_token}, (err, docs) => {
+              if(err) {
+                console.log(err);
+              }
+            })
+            res.cookie('U_token', U_token, {httpOnly: true});
+            res.send({
+              success: true,
+              type: 'GET_USERINFO_SUCCESSFULLY',
+              message: 'Get userInfo successfully',
+              user: {
+                username: userInfo.username,
+                photo: userInfo.photo,
+                level: userInfo.level
+              }
+            });
+          });
+      }
+    });
+
+    
   }
 
   async createUser(req, res, next) {
@@ -130,13 +185,20 @@ class User {
     }
     const userInfo = {
       username,
-      createDate: date
+      createDate: date,
+      photo: "",
+      level: 1
     }
     await UserInfoModel.create(userInfo);
     res.send({
       success: true,
       type: 'CREATE_NEW_USER',
-      message: 'Create new user.'
+      message: 'Create new user.',
+      user: {
+        username,
+        photo: userInfo.photo,
+        level: userInfo.level
+      }
     })
     return;
   }

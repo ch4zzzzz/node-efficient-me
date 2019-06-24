@@ -19,16 +19,32 @@ router.get(function(req, res, next) {
   if(req.session.username) {
     next();
   } else {
+    res.send({
+      code: 401,
+    })
     res.redirect('/');
   }
 })
 
 
+
 router.post('/login', User.login);
+
+router.post('/tLogin', User.tLogin);
+
+router.use(function(req, res, next) {
+  if(req.session.username) {
+    next();
+  } else {
+    res.status(401).end();
+  }
+})
 
 router.post('/addTask', Task.addTask);
 
 router.get('/getTaskList', Task.getTasks);
+
+router.post('/addFolder', Folder.addFolder);
 
 router.get('/getFolderList', Folder.getFolders);
 
