@@ -183,6 +183,16 @@ class User {
       })
       return;
     }
+
+    req.session.username = username;
+    const U_token = cryptoRandomString({length: 10, type: 'base64'})+md5(username);
+    await UserModel.updateOne(user, {U_token}, (err, docs) => {
+      if(err) {
+        console.log(err);
+      }
+    })
+    res.cookie('U_token', U_token, {httpOnly: true});
+    
     const userInfo = {
       username,
       createDate: date,
