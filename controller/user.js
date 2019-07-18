@@ -53,7 +53,7 @@ class User {
               message: 'Get userInfo successfully',
               user: {
                 username: userInfo.username,
-                photo: userInfo.photo,
+                photo: userInfo.photo || "https://flowering-tree-1258405883.cos.ap-chengdu.myqcloud.com/basic%20photo/mruf3jm3o0n62otd40hlm5a5.jpg",
                 level: userInfo.level
               }
             });
@@ -132,7 +132,7 @@ class User {
               message: 'Get userInfo successfully',
               user: {
                 username: userInfo.username,
-                photo: userInfo.photo,
+                photo: userInfo.photo || "https://flowering-tree-1258405883.cos.ap-chengdu.myqcloud.com/basic%20photo/mruf3jm3o0n62otd40hlm5a5.jpg",
                 level: userInfo.level
               }
             });
@@ -196,7 +196,7 @@ class User {
     const userInfo = {
       username,
       createDate: date,
-      photo: "",
+      photo: "https://flowering-tree-1258405883.cos.ap-chengdu.myqcloud.com/basic%20photo/mruf3jm3o0n62otd40hlm5a5.jpg",
       level: 1
     }
     await UserInfoModel.create(userInfo);
