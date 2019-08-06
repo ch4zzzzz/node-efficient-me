@@ -13,6 +13,11 @@ router.get('/', function(req, res, next) {
   res.sendFile('/index.html')
 })
 
+router.get('/home', function(req, res, next) {
+  res.type('html')
+  res.sendFile('/home/index.html')
+})
+
 
 // 登录验证
 router.get(function(req, res, next) {
