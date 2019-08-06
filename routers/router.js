@@ -8,14 +8,14 @@ const Folder = require('../controller/folder.js');
 
 const router = express.Router();
 
-router.get('/', function(req, res, next) {
-  res.type('html')
-  res.sendFile('/index.html')
-})
-
 router.get('/home', function(req, res, next) {
   res.type('html')
   res.sendFile('/home/index.html')
+})
+
+router.get('/', function(req, res, next) {
+  res.type('html')
+  res.sendFile('/index.html')
 })
 
 
