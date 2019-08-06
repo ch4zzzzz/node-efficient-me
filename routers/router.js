@@ -13,6 +13,11 @@ router.get('/home', function(req, res, next) {
   res.sendFile('/home/index.html')
 })
 
+router.get('/task-list', function(req, res, next) {
+  res.type('html');
+  res.sendFile('/task-list/index.html')
+})
+
 router.get('/', function(req, res, next) {
   res.type('html')
   res.sendFile('/index.html')
